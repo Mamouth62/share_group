@@ -1,71 +1,169 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ parent() }}Inscription{% endblock %}
-
-{% block body %}
-    <div class="container-fluid">
-        <h1 class="text-center text-primary mt-4 pt-4 display-1 fw-bold">Inscription</h1>
-        <div class="row justify-content-center">
-            <div class="col-12 col-md-6 bg-white p-4 m-0 text-primary">
-                {{ form_errors(registrationForm) }}
-
-                {{ form_start(registrationForm) }}
-                    {{ form_row(registrationForm.email) }}
-
-                    <div class="form-group">
-                        {{ form_row(registrationForm.plainPassword, {
-                            label: 'Mot de passe'
-                        }) }}
-                        <br><br>
-                        <div id="password-strength" class="progress mt-2" style="height: 10px;">
-                            <div id="password-strength-bar" class="progress-bar" role="progressbar" style="width: 0%;"></div>
-                        </div>
-                        <small id="password-strength-text" class="form-text"></small>
-                    </div>
-
-                    {{ form_row(registrationForm.agreeTerms) }}
-                    <div class="text-center">
-                        <button type="submit" class="btn">S'inscrire</button>
-                    </div>
-                {{ form_end(registrationForm) }}
-            </div>
-        </div>
-    </div>
-
-    <script>
-        const passwordInput = document.getElementById('registration_form_plainPassword');
-        const strengthBar = document.getElementById('password-strength-bar');
-        const strengthText = document.getElementById('password-strength-text');
-
-        passwordInput.addEventListener('input', function() {
-            const value = passwordInput.value;
-            let strength = 0;
-
-            // Conditions pour augmenter la force du mot de passe
-            if (value.length >= 12) strength++;
-            if (/[A-Z]/.test(value)) strength++;
-            if (/[a-z]/.test(value)) strength++;
-            if (/\d/.test(value)) strength++;
-            if (/[\W_]/.test(value)) strength++;
-
-            // Mettre à jour la barre de progression
-            let width = (strength / 5) * 100;
-            strengthBar.style.width = width + '%';
-
-            // Déterminer le texte de force du mot de passe
-            if (strength === 0) {
-                strengthText.textContent = '';
-            } else if (strength <= 2) {
-                strengthText.textContent = 'Mot de passe faible';
-                strengthBar.className = 'progress-bar bg-danger';
-            } else if (strength === 3) {
-                strengthText.textContent = 'Mot de passe moyen';
-                strengthBar.className = 'progress-bar bg-warning';
-            } else {
-                strengthText.textContent = 'Mot de passe fort';
-                strengthBar.className = 'progress-bar bg-success';
-            }
-        });
-    </script>
+{% block title %}
+	{{ parent() }}Inscription
 {% endblock %}
 
+{% block body %}
+	<div class="container-fluid">
+		<h1 class="text-center text-primary mt-4 pt-4 display-1 fw-bold">Inscription</h1>
+		<div class="row justify-content-center">
+			<div class="col-12 col-md-6 bg-white p-4 m-0 text-primary">
+				{{ form_errors(registrationForm) }}
+
+				{{ form_start(registrationForm) }}
+				{{ form_row(registrationForm.email) }}
+
+				<div class="form-group">
+					{{ form_row(registrationForm.plainPassword, {
+                            label: 'Mot de passe'
+                        }) }}
+					<br><br>
+					<div id="password-strength" class="progress mt-2" style="height: 10px;">
+						<div id="password-strength-bar" class="progress-bar" role="progressbar" style="width: 0%;"></div>
+					</div>
+					<small id="password-strength-text" class="form-text"></small>
+				</div>
+
+				{{ form_row(registrationForm.agreeTerms) }}
+				<div class="text-center">
+					<button type="submit" class="btn">S'inscrire</button>
+				</div>
+				{{ form_end(registrationForm) }}
+
+			</div>
+			<br><div class="text-center">
+				<h2>Vérification CAPTCHA</h2>
+
+				<form id="captcha-form">
+					<label for="captcha-input">Entrez le texte dans l'image :</label><br>
+					<canvas id="captcha" width="200" height="60"></canvas><br>
+					<input type="text" id="captcha-input" name="captcha-input" required><br><br>
+					<button type="submit">Soumettre</button>
+				</form>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		const passwordInput = document.getElementById('registration_form_plainPassword');
+const strengthBar = document.getElementById('password-strength-bar');
+const strengthText = document.getElementById('password-strength-text');
+
+passwordInput.addEventListener('input', function () {
+const value = passwordInput.value;
+let strength = 0;
+
+// Conditions pour augmenter la force du mot de passe
+if (value.length >= 12) 
+strength++;
+
+if (/[A-Z]/.test(value)) 
+strength++;
+
+if (/[a-z]/.test(value)) 
+strength++;
+
+if (/\d/.test(value)) 
+strength++;
+
+if (/[\W_]/.test(value)) 
+strength++;
+
+
+// Mettre à jour la barre de progression
+let width = (strength / 5) * 100;
+strengthBar.style.width = width + '%';
+
+// Déterminer le texte de force du mot de passe
+if (strength === 0) {
+strengthText.textContent = '';
+} else if (strength <= 2) {
+strengthText.textContent = 'Mot de passe faible';
+strengthBar.className = 'progress-bar bg-danger';
+} else if (strength === 3) {
+strengthText.textContent = 'Mot de passe moyen';
+strengthBar.className = 'progress-bar bg-warning';
+} else {
+strengthText.textContent = 'Mot de passe fort';
+strengthBar.className = 'progress-bar bg-success';
+}
+});
+// Initialiser les éléments
+const canvas = document.getElementById('captcha');
+const ctx = canvas.getContext('2d');
+const captchaInput = document.getElementById('captcha-input');
+const captchaForm = document.getElementById('captcha-form');
+
+// Variables globales
+let captchaCode = "";
+
+// Fonction pour générer le CAPTCHA
+function generateCaptcha() {
+const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+captchaCode = '';
+// Générer un code de 6 caractères
+for (let i = 0; i < 6; i++) {
+captchaCode += characters.charAt(Math.floor(Math.random() * characters.length));
+}
+
+// Effacer le canvas
+ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+// Ajouter un fond
+ctx.fillStyle = '#f1f1f1';
+ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+// Dessiner le texte du CAPTCHA
+ctx.font = '30px Arial';
+ctx.fillStyle = '#000000';
+ctx.fillText(captchaCode, 50, 40);
+
+// Ajouter un peu de bruit visuel (lignes et points) pour rendre le CAPTCHA plus difficile à lire pour les bots
+drawNoise();
+}
+
+// Fonction pour dessiner du bruit (lignes et points)
+function drawNoise() { // Dessiner des lignes aléatoires
+for (let i = 0; i < 5; i++) {
+ctx.beginPath();
+ctx.moveTo(Math.random() * canvas.width, Math.random() * canvas.height);
+ctx.lineTo(Math.random() * canvas.width, Math.random() * canvas.height);
+ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
+ctx.lineWidth = 2;
+ctx.stroke();
+}
+
+// Dessiner des points aléatoires
+for (let i = 0; i < 30; i++) {
+ctx.beginPath();
+ctx.arc(Math.random() * canvas.width, Math.random() * canvas.height, 1, 0, Math.PI * 2, false);
+ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+ctx.fill();
+}
+}
+
+// Validation du CAPTCHA lors de la soumission du formulaire
+captchaForm.onsubmit = function (event) {
+event.preventDefault(); // Empêcher l'envoi du formulaire pour la démo
+
+const userInput = captchaInput.value.trim();
+
+if (userInput === captchaCode) {
+alert('Vérification réussie !');
+// Vous pouvez envoyer le formulaire ici
+// Exemple : form.submit();
+} else {
+alert('Le CAPTCHA est incorrect. Essayez à nouveau.');
+captchaInput.value = ''; // Réinitialiser le champ
+generateCaptcha(); // Générer un nouveau CAPTCHA
+}
+};
+
+// Générer un CAPTCHA au chargement
+window.onload = generateCaptcha;
+
+// Regénérer un nouveau CAPTCHA au clic sur le canvas
+canvas.addEventListener('click', generateCaptcha);
+	</script>
+{% endblock %}
