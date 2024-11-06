@@ -1,0 +1,71 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ parent() }}Inscription{% endblock %}
+
+{% block body %}
+    <div class="container-fluid">
+        <h1 class="text-center text-primary mt-4 pt-4 display-1 fw-bold">Inscription</h1>
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-6 bg-white p-4 m-0 text-primary">
+                {{ form_errors(registrationForm) }}
+
+                {{ form_start(registrationForm) }}
+                    {{ form_row(registrationForm.email) }}
+
+                    <div class="form-group">
+                        {{ form_row(registrationForm.plainPassword, {
+                            label: 'Mot de passe'
+                        }) }}
+                        <br><br>
+                        <div id="password-strength" class="progress mt-2" style="height: 10px;">
+                            <div id="password-strength-bar" class="progress-bar" role="progressbar" style="width: 0%;"></div>
+                        </div>
+                        <small id="password-strength-text" class="form-text"></small>
+                    </div>
+
+                    {{ form_row(registrationForm.agreeTerms) }}
+                    <div class="text-center">
+                        <button type="submit" class="btn">S'inscrire</button>
+                    </div>
+                {{ form_end(registrationForm) }}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const passwordInput = document.getElementById('registration_form_plainPassword');
+        const strengthBar = document.getElementById('password-strength-bar');
+        const strengthText = document.getElementById('password-strength-text');
+
+        passwordInput.addEventListener('input', function() {
+            const value = passwordInput.value;
+            let strength = 0;
+
+            // Conditions pour augmenter la force du mot de passe
+            if (value.length >= 12) strength++;
+            if (/[A-Z]/.test(value)) strength++;
+            if (/[a-z]/.test(value)) strength++;
+            if (/\d/.test(value)) strength++;
+            if (/[\W_]/.test(value)) strength++;
+
+            // Mettre à jour la barre de progression
+            let width = (strength / 5) * 100;
+            strengthBar.style.width = width + '%';
+
+            // Déterminer le texte de force du mot de passe
+            if (strength === 0) {
+                strengthText.textContent = '';
+            } else if (strength <= 2) {
+                strengthText.textContent = 'Mot de passe faible';
+                strengthBar.className = 'progress-bar bg-danger';
+            } else if (strength === 3) {
+                strengthText.textContent = 'Mot de passe moyen';
+                strengthBar.className = 'progress-bar bg-warning';
+            } else {
+                strengthText.textContent = 'Mot de passe fort';
+                strengthBar.className = 'progress-bar bg-success';
+            }
+        });
+    </script>
+{% endblock %}
+
