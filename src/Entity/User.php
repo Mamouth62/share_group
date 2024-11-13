@@ -35,8 +35,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Fichier::class)]
     private Collection $fichiers;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $dateEnvoi = null;
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+private ?\DateTimeInterface $dateEnvoi = null;
+
 
     public function __construct()
     {
